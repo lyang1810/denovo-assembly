@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * De novo peptide
  */
-public class DenovoPeptide {
+public class DenovoPeptide implements Peptide {
     private int fractionIdx;
     private int spectrumIdx;
     private float retentionTime;

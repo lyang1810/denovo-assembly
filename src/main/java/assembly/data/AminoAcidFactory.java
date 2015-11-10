@@ -39,6 +39,7 @@ public class AminoAcidFactory {
         aaMap.put("V", new AminoAcid('V', 99.06841f));
 
         aaMap.put("C(+57.02)", new ModifiedAminoAcid('C', 103.00919f, 57.021464f));
+        aaMap.put("C(+125.05)", new ModifiedAminoAcid('C', 103.00919f, 125.047676f));
         aaMap.put("M(+15.99)", new ModifiedAminoAcid('M', 131.04049f, 15.994915f));
         aaMap.put("N(+.98)", new ModifiedAminoAcid('N', 114.04293f, 0.984016f));
         aaMap.put("Q(+.98)",  new ModifiedAminoAcid('Q', 128.05858f, 0.984016f));

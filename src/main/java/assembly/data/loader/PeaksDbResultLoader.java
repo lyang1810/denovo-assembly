@@ -1,8 +1,8 @@
 package assembly.data.loader;
 
-import assembly.data.AminoAcid;
-import assembly.data.AminoAcidFactory;
-import assembly.data.DbSearchPeptide;
+import assembly.data.residue.AminoAcid;
+import assembly.data.residue.AminoAcidFactory;
+import assembly.data.peptide.DbSearchPeptide;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@SuppressWarnings("Duplicates")
 public class PeaksDbResultLoader {
     private static final Logger log = Logger.getLogger(PeaksDbResultLoader.class.getName());
 

@@ -1,21 +1,22 @@
-package assembly.data;
+package assembly.data.peptide;
+
+import assembly.data.residue.AminoAcid;
 
 import java.util.Arrays;
 
 /**
- * De novo peptide
+ * database search peptide
  */
-public class DenovoPeptide implements Peptide {
+public class DbSearchPeptide implements Peptide {
     private int fractionIdx;
     private int spectrumIdx;
     private float retentionTime;
 
     private AminoAcid[] sequence;
-    private float[] confidence;
+    private float score;
 
-    public DenovoPeptide(AminoAcid[] sequence, float[] confidence) {
+    public DbSearchPeptide(AminoAcid[] sequence) {
         this.sequence = sequence;
-        this.confidence = confidence;
     }
 
     public void setFractionIdx(int fractionIdx) {
@@ -30,24 +31,33 @@ public class DenovoPeptide implements Peptide {
         this.retentionTime = retentionTime;
     }
 
+    public void setScore(float score) {
+        this.score = score;
+    }
+
+    @Override
     public int getFractionIdx() {
         return fractionIdx;
     }
 
+    @Override
     public int getSpectrumIdx() {
         return spectrumIdx;
     }
 
+    @Override
     public float getRetentionTime() {
         return retentionTime;
     }
 
+    @Override
     public AminoAcid[] getSequence() {
         return sequence;
     }
 
-    public float[] getConfidence() {
-        return confidence;
+    @Override
+    public float getScore() {
+        return score;
     }
 
     @Override

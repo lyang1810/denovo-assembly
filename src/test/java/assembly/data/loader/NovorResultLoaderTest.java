@@ -1,6 +1,6 @@
 package assembly.data.loader;
 
-import assembly.data.DenovoPeptide;
+import assembly.data.peptide.DenovoPeptide;
 import org.junit.Test;
 
 import java.io.File;

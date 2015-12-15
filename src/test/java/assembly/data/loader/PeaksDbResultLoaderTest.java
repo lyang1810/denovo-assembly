@@ -1,6 +1,7 @@
 package assembly.data.loader;
 
-import assembly.data.DbSearchPeptide;
+import assembly.data.peptide.DbSearchPeptide;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 public class PeaksDbResultLoaderTest {
 
-    @org.junit.Test
+    @Test
     public void testLoad() throws Exception {
         PeaksDbResultLoader loader = new PeaksDbResultLoader();
         List<DbSearchPeptide> peptides = loader.load(

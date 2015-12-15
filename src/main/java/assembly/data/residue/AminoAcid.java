@@ -1,4 +1,4 @@
-package assembly.data;
+package assembly.data.residue;
 
 /**
  * Amino Acid

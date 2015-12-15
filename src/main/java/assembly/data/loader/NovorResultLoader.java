@@ -1,8 +1,8 @@
 package assembly.data.loader;
 
-import assembly.data.AminoAcid;
-import assembly.data.AminoAcidFactory;
-import assembly.data.DenovoPeptide;
+import assembly.data.residue.AminoAcid;
+import assembly.data.residue.AminoAcidFactory;
+import assembly.data.peptide.DenovoPeptide;
 
 import java.io.BufferedReader;
 import java.io.File;

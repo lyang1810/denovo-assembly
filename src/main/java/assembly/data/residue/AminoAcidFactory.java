@@ -1,4 +1,4 @@
-package assembly.data;
+package assembly.data.residue;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,5 +1,6 @@
-package assembly.data;
+package assembly.data.residue;
 
+import assembly.data.residue.AminoAcid;
 import org.junit.Before;
 import org.junit.Test;
 

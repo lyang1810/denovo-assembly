@@ -1,8 +1,8 @@
 package assembly.data.loader;
 
-import assembly.data.AminoAcid;
-import assembly.data.AminoAcidFactory;
-import assembly.data.DenovoPeptide;
+import assembly.data.residue.AminoAcid;
+import assembly.data.residue.AminoAcidFactory;
+import assembly.data.peptide.DenovoPeptide;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@SuppressWarnings("Duplicates")
 public class PeaksResultLoader implements ResultLoader {
     private static final Logger log = Logger.getLogger(PeaksResultLoader.class.getName());
 
@@ -33,6 +34,7 @@ public class PeaksResultLoader implements ResultLoader {
                     headerIdxMap.put(headers[idx], idx);
                 }
                 int seqColIdx = headerIdxMap.get("Peptide");
+                int scoreColIdx = headerIdxMap.get("ALC (%)");
                 int confColIdx = headerIdxMap.get("local confidence (%)");
                 int scanColIdx = headerIdxMap.get("Scan");
                 int rtColIdx = headerIdxMap.get("RT");
@@ -47,6 +49,7 @@ public class PeaksResultLoader implements ResultLoader {
                     try {
                         AminoAcid[] seq = parseSequence(splits[seqColIdx]);
                         float[] conf = parseConfidence(splits[confColIdx]);
+                        float score = parseScore(splits[scoreColIdx]);
                         int[] fractionSpectrumIdx = parseFractionSpectrumIdx(splits[scanColIdx]);
                         int fractionIdx = (fractionSpectrumIdx[0] == -1) ? i : fractionSpectrumIdx[0];
                         int spectrumIdx = fractionSpectrumIdx[1];
@@ -56,10 +59,15 @@ public class PeaksResultLoader implements ResultLoader {
                         pep.setFractionIdx(fractionIdx);
                         pep.setSpectrumIdx(spectrumIdx);
                         pep.setRetentionTime(rt);
+                        pep.setScore(score);
 
                         peptides.add(pep);
                     } catch (NumberFormatException e) {
-                        log.log(Level.SEVERE, "Failed to parse line " + line, e);
+                        if (!splits[12].contains("/")) {
+                            // write log only if the parsing error is not caused by PEAKS merged results
+                            log.log(Level.INFO, "Failed to parse line " + line);
+                        }
+
                     }
                 }
             } catch (IOException e) {
@@ -96,6 +104,10 @@ public class PeaksResultLoader implements ResultLoader {
             conf[i] = Float.parseFloat(splits[i]);
         }
         return conf;
+    }
+
+    private float parseScore(String scoreStr) {
+        return Float.parseFloat(scoreStr);
     }
 
     private int[] parseFractionSpectrumIdx(String scanStr) {

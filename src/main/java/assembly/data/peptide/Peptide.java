@@ -1,4 +1,6 @@
-package assembly.data;
+package assembly.data.peptide;
+
+import assembly.data.residue.AminoAcid;
 
 public interface Peptide {
 
@@ -9,6 +11,8 @@ public interface Peptide {
     float getRetentionTime();
 
     AminoAcid[] getSequence();
+
+    float getScore();
 
     @Override
     String toString();

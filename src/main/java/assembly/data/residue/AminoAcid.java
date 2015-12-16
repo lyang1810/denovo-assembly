@@ -24,4 +24,20 @@ public class AminoAcid {
     public String toString() {
         return getCode();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        AminoAcid aminoAcid = (AminoAcid) o;
+        return code == aminoAcid.code && Float.compare(aminoAcid.mass, mass) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) code;
+        result = 31 * result + (mass != +0.0f ? Float.floatToIntBits(mass) : 0);
+        return result;
+    }
 }

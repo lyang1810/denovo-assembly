@@ -38,7 +38,8 @@ public class EvaluatorTest {
                 factory.getAminoAcidByCode("D")
         };
 
-        boolean[] correctness = Evaluator.checkResidueCorrectness(dnSeq, dbSeq);
+        float fragmentMzTolerance = 0.1f;
+        boolean[] correctness = Evaluator.checkResidueCorrectness(dnSeq, dbSeq, fragmentMzTolerance);
         boolean[] expected = new boolean[]{false, false, true, true, true, false, false};
         assertArrayEquals(expected, correctness);
     }

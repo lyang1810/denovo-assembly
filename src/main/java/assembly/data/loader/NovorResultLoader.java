@@ -34,11 +34,13 @@ public class NovorResultLoader implements ResultLoader {
                         AminoAcid[] seq = parseSequence(splits[9]);
                         float[] conf = parseConfidence(splits[10]);
                         int spectrumIdx = parseFractionSpectrumIdx(splits[1]);
+                        float precursorMz = parsePrecursorMz(splits[3]);
                         float rt = parseRetentionTime(splits[2]);
 
                         DenovoPeptide pep = new DenovoPeptide(seq, conf);
                         pep.setFractionIdx(i);
                         pep.setSpectrumIdx(spectrumIdx);
+                        pep.setPrecursorMz(precursorMz);
                         pep.setRetentionTime(rt);
 
                         peptides.add(pep);
@@ -94,6 +96,10 @@ public class NovorResultLoader implements ResultLoader {
 
     private int parseFractionSpectrumIdx(String scanStr) {
         return Integer.parseInt(scanStr);
+    }
+
+    private float parsePrecursorMz(String precursorMzStr) {
+        return Float.parseFloat(precursorMzStr);
     }
 
     private float parseRetentionTime(String rtStr) {

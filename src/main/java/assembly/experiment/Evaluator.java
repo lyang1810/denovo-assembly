@@ -24,10 +24,11 @@ public class Evaluator {
     /**
      * de novo sequencing PSMs and reference database search PSMs. Assume only one entry for each scan
      *
-     * @param dnMatches de novo sequences PSMs
-     * @param dbMatches datbase search PSMs as a reference. Suggest 1% FDR.
+     * @param dnMatches           de novo sequences PSMs
+     * @param dbMatches           datbase search PSMs as a reference. Suggest 1% FDR.
+     * @param fragmentMzTolerance fragment m/z tolerance in Dalton. Suggest 0.1 Da
      */
-    public Evaluator(DenovoPeptide[] dnMatches, DbSearchPeptide[] dbMatches) {
+    public Evaluator(List<DenovoPeptide> dnMatches, List<DbSearchPeptide> dbMatches, float fragmentMzTolerance) {
         this.totalReferenceResidueCount = 0;
         // Select de novo matches with reference db search result on the same scan
         this.dnMatches = new HashMap<>();
@@ -41,10 +42,12 @@ public class Evaluator {
             if (this.dbMatches.containsKey(scanTag)) {
                 AminoAcid[] dnSeq = dnMatch.getSequence();
                 AminoAcid[] dbSeq = this.dbMatches.get(scanTag).getSequence();
-                if (Math.abs(MassUtil.getTotalResidueMass(dnSeq) - MassUtil.getTotalResidueMass(dbSeq)) > 1e-6) {
-                    log.warning("The total residue mass of de novo result and db search result do not match");
+
+                float massDiff = Math.abs(MassUtil.getTotalResidueMass(dnSeq) - MassUtil.getTotalResidueMass(dbSeq));
+                if (massDiff > fragmentMzTolerance) {
+                    log.warning("Unmatched total residue mass. Diff = " + massDiff);
                 }
-                boolean[] residueCorrectness = checkResidueCorrectness(dnSeq, dbSeq);
+                boolean[] residueCorrectness = checkResidueCorrectness(dnSeq, dbSeq, fragmentMzTolerance);
                 this.dnMatches.put(dnMatch, residueCorrectness);
             }
         }
@@ -84,7 +87,7 @@ public class Evaluator {
         return (float) correctResidueCount / totalReferenceResidueCount;
     }
 
-    static boolean[] checkResidueCorrectness(AminoAcid[] dnSeq, AminoAcid[] dbSeq) {
+    static boolean[] checkResidueCorrectness(AminoAcid[] dnSeq, AminoAcid[] dbSeq, float fragmentMzTolerance) {
         boolean[] correctness = new boolean[dnSeq.length];
         Arrays.fill(correctness, false);
 
@@ -104,8 +107,8 @@ public class Evaluator {
         int p = 1;
         int q = 1;
         while (p < dnPrefix.length && q < dbPrefix.length) {
-            if (Math.abs(dnPrefix[p] - dbPrefix[q]) < 1e-6) {
-                if (Math.abs(dnPrefix[p - 1] - dbPrefix[q - 1]) < 1e-6) {
+            if (Math.abs(dnPrefix[p] - dbPrefix[q]) < fragmentMzTolerance) {
+                if (Math.abs(dnPrefix[p - 1] - dbPrefix[q - 1]) < fragmentMzTolerance) {
                     correctness[p - 1] = true;
                 }
                 p++;

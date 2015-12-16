@@ -1,6 +1,7 @@
 package assembly.data.loader;
 
 import assembly.data.peptide.DenovoPeptide;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.List;
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertEquals;
 
 public class PeaksResultLoaderTest {
 
-    @org.junit.Test
+    @Test
     public void testLoad() throws Exception {
         ResultLoader loader = new PeaksResultLoader();
         List<DenovoPeptide> peptides = loader.load(

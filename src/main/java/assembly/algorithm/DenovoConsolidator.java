@@ -63,7 +63,7 @@ public class DenovoConsolidator {
      *                 This is for aligning the peptide to the tags already in the network.
      *                 This prefix can be either positive (shift right) or negative (shift left)
      */
-    public void addDenovoTags(DenovoPeptide[] peptides, float shift) {
+    public void addDenovoTags(List<DenovoPeptide> peptides, float shift) {
         for (DenovoPeptide peptide : peptides) {
             addDenovoTags(peptide, shift);
         }
@@ -75,7 +75,7 @@ public class DenovoConsolidator {
 
         NavigableSet<Float> nodeMasses = network.navigableKeySet();
         for (Float nodeMass : nodeMasses) {
-            float maxNodeScore = 0;
+            float maxNodeScore = Float.NaN;
             Node maxNodeScorePrevNode = null;
             DenovoTag maxNodeScorePrevTag = null;
 
@@ -109,7 +109,7 @@ public class DenovoConsolidator {
                     // calculate score for the current node. Only the maximum score is kept.
                     if (bestPrevNode != null && bestPrevTag != null) {
                         float nodeScore = (bestPrevNode.score * bestPrevNode.length + bestPrevTag.confidence) / (bestPrevNode.length + 1);
-                        if (nodeScore > maxNodeScore) {
+                        if (Float.isNaN(maxNodeScore) || nodeScore > maxNodeScore) {
                             maxNodeScore = nodeScore;
                             maxNodeScorePrevNode = bestPrevNode;
                             maxNodeScorePrevTag = bestPrevTag;
@@ -117,7 +117,7 @@ public class DenovoConsolidator {
                     }
                 }
             }
-            if (maxNodeScore > 0) {
+            if (!Float.isNaN(maxNodeScore)) {
                 network.get(nodeMass).score = maxNodeScore;
                 network.get(nodeMass).length = maxNodeScorePrevNode.length + 1;
                 network.get(nodeMass).bestPrevNode = maxNodeScorePrevNode;

@@ -10,6 +10,8 @@ import java.util.Arrays;
 public class DbSearchPeptide implements Peptide {
     private int fractionIdx;
     private int spectrumIdx;
+
+    private float precursorMz;
     private float retentionTime;
 
     private AminoAcid[] sequence;
@@ -25,6 +27,10 @@ public class DbSearchPeptide implements Peptide {
 
     public void setSpectrumIdx(int spectrumIdx) {
         this.spectrumIdx = spectrumIdx;
+    }
+
+    public void setPrecursorMz(float precursorMz) {
+        this.precursorMz = precursorMz;
     }
 
     public void setRetentionTime(float retentionTime) {
@@ -43,6 +49,11 @@ public class DbSearchPeptide implements Peptide {
     @Override
     public int getSpectrumIdx() {
         return spectrumIdx;
+    }
+
+    @Override
+    public float getPrecursorMz() {
+        return precursorMz;
     }
 
     @Override

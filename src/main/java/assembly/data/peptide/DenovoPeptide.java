@@ -10,6 +10,8 @@ import java.util.Arrays;
 public class DenovoPeptide implements Peptide {
     private int fractionIdx;
     private int spectrumIdx;
+
+    private float precursorMz;
     private float retentionTime;
 
     private AminoAcid[] sequence;
@@ -29,6 +31,10 @@ public class DenovoPeptide implements Peptide {
         this.spectrumIdx = spectrumIdx;
     }
 
+    public void setPrecursorMz(float precursorMz) {
+        this.precursorMz = precursorMz;
+    }
+
     public void setRetentionTime(float retentionTime) {
         this.retentionTime = retentionTime;
     }
@@ -45,6 +51,11 @@ public class DenovoPeptide implements Peptide {
     @Override
     public int getSpectrumIdx() {
         return spectrumIdx;
+    }
+
+    @Override
+    public float getPrecursorMz() {
+        return precursorMz;
     }
 
     @Override
@@ -70,4 +81,5 @@ public class DenovoPeptide implements Peptide {
     public String toString() {
         return Arrays.toString(sequence);
     }
+
 }

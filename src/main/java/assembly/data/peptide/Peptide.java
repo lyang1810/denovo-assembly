@@ -8,6 +8,8 @@ public interface Peptide {
 
     int getSpectrumIdx();
 
+    float getPrecursorMz();
+
     float getRetentionTime();
 
     AminoAcid[] getSequence();

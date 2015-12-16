@@ -35,6 +35,7 @@ public class PeaksDbResultLoader {
                 int seqColIdx = headerIdxMap.get("Peptide");
                 int scoreColIdx = headerIdxMap.get("-10lgP");
                 int scanColIdx = headerIdxMap.get("Scan");
+                int precursorMzColIdx = headerIdxMap.get("m/z");
                 int rtColIdx = headerIdxMap.get("RT");
 
                 String line;
@@ -50,11 +51,13 @@ public class PeaksDbResultLoader {
                         int[] fractionSpectrumIdx = parseFractionSpectrumIdx(splits[scanColIdx]);
                         int fractionIdx = (fractionSpectrumIdx[0] == -1) ? i : fractionSpectrumIdx[0];
                         int spectrumIdx = fractionSpectrumIdx[1];
+                        float precursorMz = parsePrecursorMz(splits[precursorMzColIdx]);
                         float rt = parseRetentionTime(splits[rtColIdx]);
 
                         DbSearchPeptide pep = new DbSearchPeptide(seq);
                         pep.setFractionIdx(fractionIdx);
                         pep.setSpectrumIdx(spectrumIdx);
+                        pep.setPrecursorMz(precursorMz);
                         pep.setRetentionTime(rt);
                         pep.setScore(score);
 
@@ -104,6 +107,10 @@ public class PeaksDbResultLoader {
             int spectrumIdx = Integer.parseInt(scanStr);
             return new int[]{-1, spectrumIdx};
         }
+    }
+
+    private float parsePrecursorMz(String precursorMzStr) {
+        return Float.parseFloat(precursorMzStr);
     }
 
     private float parseRetentionTime(String rtStr) {

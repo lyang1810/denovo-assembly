@@ -19,7 +19,7 @@ public class DenovoConsolidator {
     /**
      * Initiate a DenovoConsolidator
      *
-     * @param fragmentMzTolerance fragmnet m/z tolerance in Dalton. Suggest 0.1 Da
+     * @param fragmentMzTolerance fragment m/z tolerance in Dalton. Suggest 0.1 Da
      */
     public DenovoConsolidator(float totalResidueMass, float fragmentMzTolerance) {
         this.totalResidueMass = totalResidueMass;
@@ -81,7 +81,7 @@ public class DenovoConsolidator {
 
             for (AminoAcid aa : aaSet) {
                 float prevMass = nodeMass - aa.getMass();
-                if (prevMass < 0) {
+                if (prevMass < -1e-6) {
                     continue;
                 }
                 float lowerBound = prevMass - fragmentMzTolerance;

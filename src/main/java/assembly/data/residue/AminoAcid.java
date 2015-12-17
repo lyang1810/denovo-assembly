@@ -1,5 +1,7 @@
 package assembly.data.residue;
 
+import java.util.Objects;
+
 /**
  * Amino Acid
  */
@@ -29,15 +31,13 @@ public class AminoAcid {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         AminoAcid aminoAcid = (AminoAcid) o;
-        return code == aminoAcid.code && Float.compare(aminoAcid.mass, mass) == 0;
+        return code == aminoAcid.code &&
+                Float.compare(aminoAcid.mass, mass) == 0;
     }
 
     @Override
     public int hashCode() {
-        int result = (int) code;
-        result = 31 * result + (mass != +0.0f ? Float.floatToIntBits(mass) : 0);
-        return result;
+        return Objects.hash(code, mass);
     }
 }

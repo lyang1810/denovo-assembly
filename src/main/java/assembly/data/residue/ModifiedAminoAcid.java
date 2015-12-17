@@ -1,5 +1,7 @@
 package assembly.data.residue;
 
+import java.util.Objects;
+
 public class ModifiedAminoAcid extends AminoAcid {
     protected float modMass;
 
@@ -16,5 +18,19 @@ public class ModifiedAminoAcid extends AminoAcid {
     @Override
     public float getMass() {
         return mass + modMass;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+        ModifiedAminoAcid that = (ModifiedAminoAcid) o;
+        return Float.compare(that.modMass, modMass) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), modMass);
     }
 }

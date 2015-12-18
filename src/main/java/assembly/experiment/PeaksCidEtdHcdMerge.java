@@ -6,6 +6,7 @@ import assembly.data.loader.PeaksDbResultLoader;
 import assembly.data.loader.PeaksResultLoader;
 import assembly.data.peptide.DbSearchPeptide;
 import assembly.data.peptide.DenovoPeptide;
+import assembly.data.residue.AminoAcid;
 import assembly.util.MassUtil;
 
 import java.io.File;
@@ -31,34 +32,38 @@ public class PeaksCidEtdHcdMerge {
         PeaksDbResultLoader dbLoader = new PeaksDbResultLoader();
         List<DbSearchPeptide> dbMatches = dbLoader.load(new File[]{new File(dataset + "/DB search psm.csv")});
 
-        // Output baseline metrics
+        // Output baseline 1 metrics: For each scan, use the best PEAKS de novo candidate from the scan
         {
-            System.out.println("Baseline");
-            List<DenovoPeptide> topDnMatches = filter(dnMatches);
-            Evaluator eval = new Evaluator(topDnMatches, dbMatches, fragmentMzTolerance);
-            for (int t = 0; t <= 100; t++) {
-                float precision = eval.getPrecisionRate(t);
-                float recall = eval.getRecallRate(t);
-                System.out.println(t + "\t" + precision + "\t" + recall);
-            }
+            System.out.println("Baseline 1");
+            List<DenovoPeptide> processedDnMatches = prepareBaseline1(dnMatches);
+            evaluate(dbMatches, processedDnMatches);
         }
 
-        // Run CID/ETD/HCD consolidation
-        List<DenovoPeptide> dnMatchesConsolidated = consolidate(dnMatches);
+        // Output baseline 2 metrics: For each scan, use the best PEAKS de novo candidate from the CID/HCD/ETD scan group
+        {
+            System.out.println("Baseline 2");
+            List<DenovoPeptide> processedDnMatches = prepareBaseline2(dnMatches);
+            evaluate(dbMatches, processedDnMatches);
+        }
 
-        // Output experimental metrics
+        // Output experimental metrics: For each scan, use the sequence consolidated from all PEAKS de novo candidates in the CID/HCD/ETD group
         {
             System.out.println("Experimental");
-            Evaluator eval = new Evaluator(dnMatchesConsolidated, dbMatches, fragmentMzTolerance);
-            for (int t = 0; t <= 100; t++) {
-                float precision = eval.getPrecisionRate(t);
-                float recall = eval.getRecallRate(t);
-                System.out.println(t + "\t" + precision + "\t" + recall);
-            }
+            List<DenovoPeptide> processedDnMatches = prepareExperimental(dnMatches);
+            evaluate(dbMatches, processedDnMatches);
         }
     }
 
-    private static List<DenovoPeptide> filter(List<DenovoPeptide> dnMatches) {
+    private static void evaluate(List<DbSearchPeptide> dbMatches, List<DenovoPeptide> dnMatchesConsolidated) {
+        Evaluator eval = new Evaluator(dnMatchesConsolidated, dbMatches, fragmentMzTolerance);
+        for (int t = 0; t <= 100; t++) {
+            float precision = eval.getPrecisionRate(t);
+            float recall = eval.getRecallRate(t);
+            System.out.println(t + "\t" + precision + "\t" + recall);
+        }
+    }
+
+    private static List<DenovoPeptide> prepareBaseline1(List<DenovoPeptide> dnMatches) {
         LinkedHashMap<String, DenovoPeptide> dnMatchesFiltered = new LinkedHashMap<>();
 
         // keep the top candidate for every scan
@@ -75,16 +80,16 @@ public class PeaksCidEtdHcdMerge {
         return new ArrayList<>(dnMatchesFiltered.values());
     }
 
-    private static List<DenovoPeptide> consolidate(List<DenovoPeptide> dnMatches) {
+    private static List<DenovoPeptide> prepareBaseline2(List<DenovoPeptide> dnMatches) {
         List<DenovoPeptide> dnMatchesConsolidated = new ArrayList<>();
 
-        // consolidate de novo candidates of scans in a CID/ETD/HCD group
+        // find the best de novo candidate of scans in a CID/ETD/HCD group
         List<DenovoPeptide> group = new ArrayList<>();
         float groupMz = -1;
 
         for (DenovoPeptide dnMatch : dnMatches) {
             if (Math.abs(dnMatch.getPrecursorMz() - groupMz) > 1e-6) {
-                dnMatchesConsolidated.addAll(execute(group));
+                dnMatchesConsolidated.addAll(processBaseline2Group(group));
                 group.clear();
                 groupMz = dnMatch.getPrecursorMz();
                 group.add(dnMatch);
@@ -94,11 +99,65 @@ public class PeaksCidEtdHcdMerge {
         }
 
         // last group
-        dnMatchesConsolidated.addAll(execute(group));
+        dnMatchesConsolidated.addAll(processBaseline2Group(group));
         return dnMatchesConsolidated;
     }
 
-    private static List<DenovoPeptide> execute(List<DenovoPeptide> group) {
+    private static List<DenovoPeptide> processBaseline2Group(List<DenovoPeptide> group) {
+        List<DenovoPeptide> dnMatchedMerged = new ArrayList<>();
+        if (group == null || group.size() == 0) {
+            return dnMatchedMerged;
+        }
+
+        DenovoPeptide bestMatch = null;
+        for (DenovoPeptide match : group) {
+            if (bestMatch == null || match.getScore() > bestMatch.getScore()) {
+                bestMatch = match;
+            }
+        }
+
+        // assemble a merged de novo match for each scan
+        Set<String> encountered = new HashSet<>();
+        for (DenovoPeptide match : group) {
+            String scanTag = match.getFractionIdx() + ":" + match.getSpectrumIdx();
+            if (!encountered.contains(scanTag)) {
+                DenovoPeptide updated = new DenovoPeptide(bestMatch.getSequence(), bestMatch.getConfidence());
+                updated.setScore(bestMatch.getScore());
+                updated.setPrecursorMz(match.getPrecursorMz());
+                updated.setRetentionTime(match.getRetentionTime());
+                updated.setFractionIdx(match.getFractionIdx());
+                updated.setSpectrumIdx(match.getSpectrumIdx());
+                dnMatchedMerged.add(updated);
+                encountered.add(scanTag);
+            }
+        }
+        return dnMatchedMerged;
+    }
+
+    private static List<DenovoPeptide> prepareExperimental(List<DenovoPeptide> dnMatches) {
+        List<DenovoPeptide> dnMatchesConsolidated = new ArrayList<>();
+
+        // consolidate de novo candidates of scans in a CID/ETD/HCD group
+        List<DenovoPeptide> group = new ArrayList<>();
+        float groupMz = -1;
+
+        for (DenovoPeptide dnMatch : dnMatches) {
+            if (Math.abs(dnMatch.getPrecursorMz() - groupMz) > 1e-6) {
+                dnMatchesConsolidated.addAll(processExperimentalGroup(group));
+                group.clear();
+                groupMz = dnMatch.getPrecursorMz();
+                group.add(dnMatch);
+            } else {
+                group.add(dnMatch);
+            }
+        }
+
+        // last group
+        dnMatchesConsolidated.addAll(processExperimentalGroup(group));
+        return dnMatchesConsolidated;
+    }
+
+    private static List<DenovoPeptide> processExperimentalGroup(List<DenovoPeptide> group) {
         List<DenovoPeptide> dnMatchedMerged = new ArrayList<>();
         if (group == null || group.size() == 0) {
             return dnMatchedMerged;
